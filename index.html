@@ -265,6 +265,11 @@ footer p{font-size:.7rem;color:var(--muted)}
 .lead-view-done h3{margin-top:2px}
 .lead-view-done p{font-size:.83rem;color:var(--muted);max-width:280px;margin-bottom:6px}
 .lead-view-done .btn-main{width:100%}
+.lead-countdown-ring{position:relative;width:64px;height:64px;margin:4px auto}
+.lead-countdown-svg{width:64px;height:64px;transform:rotate(-90deg)}
+.lead-ring-bg{fill:none;stroke:var(--b2);stroke-width:3}
+.lead-ring-fill{fill:none;stroke:var(--blue-l);stroke-width:3;stroke-linecap:round;stroke-dasharray:113;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.lead-countdown-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--h);font-size:1.3rem;font-weight:700;color:var(--blue-l)}
 </style>
 </head>
 <body>
@@ -510,12 +515,19 @@ footer p{font-size:.7rem;color:var(--muted)}
       <p>Setting up your invite...</p>
     </div>
 
-    <!-- STATE 3: thank you -->
+    <!-- STATE 3: thank you + countdown -->
     <div class="lead-view lead-view-done">
       <div class="lead-check">✓</div>
       <h3>You're In! 🎉</h3>
-      <p>We just opened the Telegram group in a new tab. If it didn't pop up, tap below.</p>
-      <a href="#" id="leadTelegramLink" target="_blank" rel="noopener" class="btn-main">Open Telegram Group →</a>
+      <p>Redirecting you to the Telegram group automatically…</p>
+      <div class="lead-countdown-ring">
+        <svg viewBox="0 0 44 44" class="lead-countdown-svg">
+          <circle cx="22" cy="22" r="18" class="lead-ring-bg"/>
+          <circle cx="22" cy="22" r="18" class="lead-ring-fill" id="leadRingFill"/>
+        </svg>
+        <span class="lead-countdown-num" id="leadCountdownNum">5</span>
+      </div>
+      <a href="#" id="leadTelegramLink" class="btn-main">Join Telegram Now →</a>
     </div>
   </div>
 </div>
@@ -648,16 +660,41 @@ leadForm.addEventListener('submit', (e)=>{
     console.warn('Supabase not configured — lead not saved:', firstName, lastName, utmData);
   }
 
-  // 1s "joining" animation, then open Telegram in a NEW tab and swap the
-  // modal into a thank-you state. window.open here is still inside the
-  // original click's user-activation window in every mainstream browser,
-  // but some in-app browsers (Facebook/Instagram) block new tabs outright —
-  // that's exactly why the thank-you view also shows a manual link.
+  // Show loading briefly, then switch to the thank-you + countdown state.
+  // No window.open — in-app browsers (Instagram/Facebook) block new tabs.
+  // Instead: show a 5-second countdown, then redirect same-tab.
+  // The manual button also redirects same-tab for instant tap.
   leadModal.dataset.state = 'loading';
   setTimeout(()=>{
-    window.open(TELEGRAM_URL, '_blank', 'noopener');
     leadModal.dataset.state = 'done';
-  }, 1000);
+    startCountdown();
+  }, 800);
+
+  function startCountdown(){
+    const numEl  = document.getElementById('leadCountdownNum');
+    const ringEl = document.getElementById('leadRingFill');
+    const circumference = 113; // 2π × r(18)
+    let seconds = 5;
+
+    // Wire up the manual button — same-tab redirect
+    leadTelegramLink.addEventListener('click', function(e){
+      e.preventDefault();
+      window.location.href = TELEGRAM_URL;
+    }, { once: true });
+
+    // Tick immediately so first frame shows 5
+    function tick(){
+      if(numEl) numEl.textContent = seconds;
+      if(ringEl) ringEl.style.strokeDashoffset = circumference * (1 - seconds / 5);
+      if(seconds <= 0){
+        window.location.href = TELEGRAM_URL;
+        return;
+      }
+      seconds--;
+      setTimeout(tick, 1000);
+    }
+    tick();
+  }
 });
 </script>
 </body>
