@@ -1,0 +1,228 @@
+<title>T Marz Bridge</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --blue: #1A5CFF;
+  --blue-l: #4D85FF;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: #04060E;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background — trading chart grid + glow */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 50%, rgba(26,92,255,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(26,92,255,0.07) 0%, transparent 60%);
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(26,92,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,92,255,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: 0;
+}
+
+/* Floating glow orbs */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+}
+.orb-1 { width: 400px; height: 400px; background: #1A5CFF; top: -100px; right: -100px; }
+.orb-2 { width: 300px; height: 300px; background: #0A2FCC; bottom: -80px; left: -80px; }
+
+/* Card */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: rgba(10, 13, 28, 0.85);
+  border: 1px solid rgba(26,92,255,0.35);
+  border-radius: 16px;
+  padding: 40px 28px 32px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 0 1px rgba(26,92,255,0.1),
+    0 32px 80px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Logo */
+.logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--blue-l);
+  margin-bottom: 28px;
+  opacity: 0.9;
+}
+
+/* Headline */
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.9rem, 7vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  text-wrap: balance;
+}
+h1 span { color: var(--blue-l); }
+
+/* Buttons */
+.btns { display: flex; flex-direction: column; gap: 12px; }
+
+.btn-yes {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  background: var(--blue);
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 32px rgba(26,92,255,0.4), 0 4px 16px rgba(0,0,0,0.4);
+  transition: background .2s, transform .15s;
+  text-decoration: none;
+}
+.btn-yes:hover { background: #2a6bff; }
+.btn-yes:active { transform: scale(.98); }
+
+.btn-no {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: .88rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  text-decoration: none;
+}
+.btn-no:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); }
+
+/* Countdown */
+.cd-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.cd-label { font-size: .72rem; color: rgba(255,255,255,0.3); letter-spacing: .04em; }
+
+.ring-wrap { position: relative; width: 26px; height: 26px; flex-shrink: 0; }
+.ring-svg { width: 26px; height: 26px; transform: rotate(-90deg); }
+.ring-bg   { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 3; }
+.ring-fill {
+  fill: none; stroke: var(--blue-l); stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 65.97; stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+.ring-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .68rem; font-weight: 700; color: var(--blue-l);
+}
+</style>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+  <div class="logo">T Marz</div>
+
+  <h1>Get Your<br><span>Free Training</span><br>Now</h1>
+
+  <div class="btns">
+    <a href="https://t-marz.com/" class="btn-yes" id="yesBtn">Yes, I Want In →</a>
+  </div>
+
+  <div class="cd-row">
+    <span class="cd-label">Redirecting in</span>
+    <div class="ring-wrap">
+      <svg viewBox="0 0 26 26" class="ring-svg">
+        <circle cx="13" cy="13" r="10.5" class="ring-bg"/>
+        <circle cx="13" cy="13" r="10.5" class="ring-fill" id="ringFill"/>
+      </svg>
+      <span class="ring-num" id="ringNum">5</span>
+    </div>
+    <span class="cd-label">seconds</span>
+  </div>
+</div>
+
+<script>
+const DEST = 'https://t-marz.com/';
+const circ = 2 * Math.PI * 10.5;
+const ring = document.getElementById('ringFill');
+const num  = document.getElementById('ringNum');
+ring.style.strokeDasharray = circ;
+ring.style.strokeDashoffset = 0;
+
+let s = 5, timer;
+
+function tick() {
+  num.textContent = s;
+  ring.style.strokeDashoffset = circ * (1 - s / 5);
+  if (s <= 0) { window.location.href = DEST; return; }
+  s--;
+  timer = setTimeout(tick, 1000);
+}
+tick();
+
+document.getElementById('yesBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  clearTimeout(timer);
+  window.location.href = DEST;
+});
+
+document.getElementById('noBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  clearTimeout(timer);
+  window.location.href = DEST;
+});
+</script>
